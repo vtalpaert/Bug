@@ -3,8 +3,8 @@ import RPi.GPIO as GPIO
 # Headers for GPIO.BOARD configuration, comments are for BCM config
 # motor 1
 ENA = 29  # 5
-IN1 = 7  # 4
-IN2 = 33  # 13
+IN1 = 33  # 13
+IN2 = 7  # 4
 # motor 2
 IN3 = 13  # 27
 IN4 = 16  # 23
@@ -14,6 +14,7 @@ ENB = 31  # 6
 FREQ = 40
 
 DEBUG = True
+
 
 class L298N(object):
     def __init__(self):
@@ -64,7 +65,7 @@ class L298N(object):
 
     def set_duty_a(self, duty):
         if duty != self.state['a']:
-            if duty * self.state['a'] < 0:
+            if duty * self.state['a'] <= 0:
                 if duty < 0:
                     self.backward_a()
                 else:
@@ -74,10 +75,14 @@ class L298N(object):
 
     def set_duty_b(self, duty):
         if duty != self.state['b']:
-            if duty * self.state['b'] < 0:
+            if duty * self.state['b'] <= 0:
                 if duty < 0:
                     self.backward_b()
                 else:
                     self.forward_b()
             self.pwm_b.ChangeDutyCycle(abs(duty))
             self.state['b'] = duty
+
+    def stop(self):
+        self.set_duty_a(0)
+        self.set_duty_b(0)

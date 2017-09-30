@@ -77,8 +77,7 @@ class Controller(object):
                     print self.pwm.state
                 elif btn_a_pressed:  # detect a release
                     btn_a_pressed = False
-                    self.pwm.set_duty_a(0)
-                    self.pwm.set_duty_b(0)
+                    self.pwm.stop()
                     print "STOP"
                 time.sleep(0.05)
         finally:
