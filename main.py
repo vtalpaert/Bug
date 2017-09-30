@@ -73,7 +73,7 @@ class Controller(object):
                     self.pwm.set_duty_a(left)
                     self.pwm.set_duty_b(right)
                 time.sleep(0.05)
-        except Exception:
+        finally:
             self.pwm.cleanup()
             print "Interrupted. Good bye."
 
