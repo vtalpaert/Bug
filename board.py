@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 # motor 1
 ENA = 29  # 5
 IN1 = 33  # 13
-IN2 = 7  # 4
+IN2 = 12  # 18
 # motor 2
 IN3 = 13  # 27
 IN4 = 16  # 23
@@ -68,7 +68,7 @@ class L298N(object):
             if duty * self.state['a'] <= 0:
                 if duty < 0:
                     self.backward_a()
-                else:
+                elif duty > 0:
                     self.forward_a()
             self.pwm_a.ChangeDutyCycle(abs(duty))
             self.state['a'] = duty
@@ -78,7 +78,7 @@ class L298N(object):
             if duty * self.state['b'] <= 0:
                 if duty < 0:
                     self.backward_b()
-                else:
+                elif duty > 0:
                     self.forward_b()
             self.pwm_b.ChangeDutyCycle(abs(duty))
             self.state['b'] = duty
