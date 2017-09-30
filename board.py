@@ -13,6 +13,7 @@ ENB = 31  # 6
 # PWM frequency
 FREQ = 40
 
+DEBUG = True
 
 class L298N(object):
     def __init__(self):
@@ -35,20 +36,30 @@ class L298N(object):
         self.forward_b()
 
     def cleanup(self):
+        if DEBUG:
+            print "cleanup"
         self.pwm_a.stop()
         self.pwm_b.stop()
         GPIO.cleanup()
 
     def forward_a(self):
+        if DEBUG:
+            print "forward A"
         GPIO.output((IN1, IN2), (GPIO.LOW, GPIO.HIGH))
 
     def forward_b(self):
+        if DEBUG:
+            print "forward B"
         GPIO.output((IN3, IN4), (GPIO.LOW, GPIO.HIGH))
 
     def backward_a(self):
+        if DEBUG:
+            print "backward A"
         GPIO.output((IN1, IN2), (GPIO.HIGH, GPIO.LOW))
 
     def backward_b(self):
+        if DEBUG:
+            print "backward B"
         GPIO.output((IN3, IN4), (GPIO.HIGH, GPIO.LOW))
 
     def set_duty_a(self, duty):
