@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 # motor 1
 ENA = 29  # 5
 IN1 = 7  # 4
-IN2 = 12  # 18
+IN2 = 33  # 13
 # motor 2
 IN3 = 13  # 27
 IN4 = 16  # 23
