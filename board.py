@@ -2,15 +2,15 @@ from collections import namedtuple
 
 import RPi.GPIO as GPIO
 
-# Headers for GPIO.BOARD configuration
+# Headers for GPIO.BOARD configuration, comments are for BCM config
 # motor 1
-ENA = 29
-IN1 = 7
-IN2 = 11
+ENA = 29  # 5
+IN1 = 7  # 4
+IN2 = 12  # 18
 # motor 2
-IN3 = 13
-IN4 = 15
-ENB = 31
+IN3 = 13  # 27
+IN4 = 16  # 23
+ENB = 31  # 6
 
 # PWM frequency
 FREQ = 40
