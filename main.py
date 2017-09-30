@@ -72,9 +72,9 @@ class Controller(object):
                     right_fact = acc_to_rotation_right(-acc_x)
                     left = int(left_fact * forward)
                     right = int(right_fact * forward)
-                    print left, right
                     self.pwm.set_duty_a(left)
                     self.pwm.set_duty_b(right)
+                    print self.pwm.state
                 elif btn_a_pressed:  # detect a release
                     btn_a_pressed = False
                     self.pwm.set_duty_a(0)
