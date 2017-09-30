@@ -29,8 +29,10 @@ class L298N(object):
             GPIO.setup(output_pin, GPIO.OUT)
         self.pwm_a = GPIO.PWM(ENA, FREQ)
         self.pwm_a.start(0)
+        self.forward_a()
         self.pwm_b = GPIO.PWM(ENB, FREQ)
         self.pwm_b.start(0)
+        self.forward_b()
 
     def cleanup(self):
         self.pwm_a.stop()
