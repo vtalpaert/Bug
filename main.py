@@ -50,6 +50,7 @@ acc_to_rotation_right = speed_calculator(
     1
 )
 
+
 class Controller(object):
 
     def __init__(self):
@@ -60,17 +61,21 @@ class Controller(object):
         self.wiimote.connect()
         self.pwm.setup()
 
-        while True:
-            if self.wiimote.is_btn_a_pressed():
-                acc_x, acc_y, acc_z = self.wiimote.read_acc()
-                forward = acc_to_speed(acc_y)
-                left_fact = acc_to_rotation_left(acc_x)
-                right_fact = acc_to_rotation_right(-acc_x)
-                left = int(left_fact * forward)
-                right = int(right_fact * forward)
-                self.pwm.set_duty_a(left)
-                self.pwm.set_duty_b(right)
-            time.sleep(0.05)
+        try:
+            while True:
+                if self.wiimote.is_btn_a_pressed():
+                    acc_x, acc_y, acc_z = self.wiimote.read_acc()
+                    forward = acc_to_speed(acc_y)
+                    left_fact = acc_to_rotation_left(acc_x)
+                    right_fact = acc_to_rotation_right(-acc_x)
+                    left = int(left_fact * forward)
+                    right = int(right_fact * forward)
+                    self.pwm.set_duty_a(left)
+                    self.pwm.set_duty_b(right)
+                time.sleep(0.05)
+        except Exception:
+            self.pwm.cleanup()
+            print "Interrupted. Good bye."
 
 
 if __name__ == "__main__":
