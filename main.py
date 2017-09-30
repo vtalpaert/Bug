@@ -62,8 +62,10 @@ class Controller(object):
         self.pwm.setup()
 
         try:
+            btn_a_pressed = False
             while True:
                 if self.wiimote.is_btn_a_pressed():
+                    btn_a_pressed = True
                     acc_x, acc_y, acc_z = self.wiimote.read_acc()
                     forward = acc_to_speed(acc_y)
                     left_fact = acc_to_rotation_left(acc_x)
@@ -72,6 +74,11 @@ class Controller(object):
                     right = int(right_fact * forward)
                     self.pwm.set_duty_a(left)
                     self.pwm.set_duty_b(right)
+                elif btn_a_pressed:  # detect a release
+                    btn_a_pressed = False
+                    self.pwm.set_duty_a(0)
+                    self.pwm.set_duty_b(0)
+                    print "STOP"
                 time.sleep(0.05)
         finally:
             self.pwm.cleanup()

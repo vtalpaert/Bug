@@ -3,8 +3,8 @@ import RPi.GPIO as GPIO
 # Headers for GPIO.BOARD configuration, comments are for BCM config
 # motor 1
 ENA = 29  # 5
-IN1 = 7  # 4
-IN2 = 12  # 18
+IN1 = 12  # 18
+IN2 = 7  # 4
 # motor 2
 IN3 = 13  # 27
 IN4 = 16  # 23
