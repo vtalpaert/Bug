@@ -72,8 +72,12 @@ class Controller(object):
                     right_fact = acc_to_rotation_right(-acc_x)
                     left = int(left_fact * forward)
                     right = int(right_fact * forward)
-                    self.pwm.set_duty_a(right)
-                    self.pwm.set_duty_b(left)
+                    if self.wiimote.is_btn_b_pressed():
+                        self.pwm.set_duty_a(-right)
+                        self.pwm.set_duty_b(-left)
+                    else:
+                        self.pwm.set_duty_a(right)
+                        self.pwm.set_duty_b(left)
                     print self.pwm.state
                 elif btn_a_pressed:  # detect a release
                     btn_a_pressed = False
