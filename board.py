@@ -2,13 +2,13 @@ import RPi.GPIO as GPIO
 
 # Headers for GPIO.BOARD configuration, comments are for BCM config
 # motor 1
-ENA = 29  # 5
-IN1 = 33  # 13
-IN2 = 12  # 18
+ENA = 12  # 18
+IN1 = 11  # 17
+IN2 = 13  # 27
 # motor 2
-IN3 = 13  # 27
-IN4 = 16  # 23
-ENB = 31  # 6
+IN3 = 16  # 23
+IN4 = 15  # 22
+ENB = 18  # 24
 
 # PWM frequency
 FREQ = 40
