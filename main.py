@@ -25,13 +25,17 @@ def speed_calculator(x0, x1, x2, y0, y1, y2):
     return _angle_to_speed
 
 
+max_motor_voltage = 6  # [V]
+max_battery_output = 8.5  # [V]
+max_pwm = int(100 * max_motor_voltage / max_battery_output)
+
 acc_to_speed = speed_calculator(
     97,
     117,
     125,
     0,
     20,
-    50
+    max_pwm
 )
 acc_to_rotation_left = speed_calculator(
     100,
@@ -53,40 +57,68 @@ acc_to_rotation_right = speed_calculator(
 
 class Controller(object):
 
-    def __init__(self):
+    def __init__(self, refresh_pwm=0.05, refresh_trigger=10):
         self.pwm = board.L298N()
+        self.trigger = board.Button(True)
         self.wiimote = wiimote.WiimoteController()
+        self.is_setup = False
+        self.refresh_pwm = refresh_pwm
+        self.refresh_trigger = refresh_trigger
+
+    def setup(self):
+        if self.is_setup:
+            return
+        if not self.wiimote.is_connected:
+            if not self.wiimote.connect(exit_if_fail=False):
+                return
+        self.pwm.setup()
+        self.is_setup = True
+
+    def cleanup(self):
+        if not self.is_setup:
+            return
+        self.pwm.cleanup(all_board=True)
+        self.wiimote.cleanup()
+        self.is_setup = False
+
+    def control_for(self, nb_iterations):
+        btn_a_pressed = False
+        for _ in range(nb_iterations):
+            if self.wiimote.is_btn_a_pressed():
+                btn_a_pressed = True
+                acc_x, acc_y, acc_z = self.wiimote.read_acc()
+                forward = acc_to_speed(acc_y)
+                left_fact = acc_to_rotation_left(acc_x)
+                right_fact = acc_to_rotation_right(-acc_x)
+                left = int(left_fact * forward)
+                right = int(right_fact * forward)
+                if self.wiimote.is_btn_b_pressed():
+                    self.pwm.set_duty_a(-right)
+                    self.pwm.set_duty_b(-left)
+                else:
+                    self.pwm.set_duty_a(right)
+                    self.pwm.set_duty_b(left)
+                print self.pwm.state
+            elif btn_a_pressed:  # detect a release
+                btn_a_pressed = False
+                self.pwm.stop()
+                print "STOP"
+            time.sleep(self.refresh_pwm)
 
     def run(self):
-        self.wiimote.connect()
-        self.pwm.setup()
-
-        try:
-            btn_a_pressed = False
-            while True:
-                if self.wiimote.is_btn_a_pressed():
-                    btn_a_pressed = True
-                    acc_x, acc_y, acc_z = self.wiimote.read_acc()
-                    forward = acc_to_speed(acc_y)
-                    left_fact = acc_to_rotation_left(acc_x)
-                    right_fact = acc_to_rotation_right(-acc_x)
-                    left = int(left_fact * forward)
-                    right = int(right_fact * forward)
-                    if self.wiimote.is_btn_b_pressed():
-                        self.pwm.set_duty_a(-right)
-                        self.pwm.set_duty_b(-left)
-                    else:
-                        self.pwm.set_duty_a(right)
-                        self.pwm.set_duty_b(left)
-                    print self.pwm.state
-                elif btn_a_pressed:  # detect a release
-                    btn_a_pressed = False
-                    self.pwm.stop()
-                    print "STOP"
-                time.sleep(0.05)
-        finally:
-            self.pwm.cleanup()
-            print "Interrupted. Good bye."
+        self.trigger.setup()
+        while True:
+            if self.trigger.triggered():
+                if not self.is_setup:
+                    self.setup()
+                if not self.is_setup:
+                    print "You had an error in controller setup"
+                else:
+                    self.control_for(1000)
+            else:
+                if self.is_setup:
+                    self.cleanup()
+            time.sleep(self.refresh_trigger)
 
 
 if __name__ == "__main__":

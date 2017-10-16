@@ -1,19 +1,27 @@
+import time
 import RPi.GPIO as GPIO
 
-# Headers for GPIO.BOARD configuration, comments are for BCM config
+# Headers for GPIO.BCM configuration
+GPIO.setmode(GPIO.BCM)
 # motor 1
-ENA = 12  # 18
-IN1 = 11  # 17
-IN2 = 13  # 27
+ENA = 18
+IN1 = 17
+IN2 = 27
 # motor 2
-IN3 = 16  # 23
-IN4 = 15  # 22
-ENB = 18  # 24
+IN3 = 23
+IN4 = 22
+ENB = 24
+# battery voltage reading pin
+#BAT = 0
+# trigger switch/button
+TSW = 0
+TBT = 25
+
 
 # PWM frequency
 FREQ = 40
 
-DEBUG = True
+DEBUG = False
 
 
 class L298N(object):
@@ -26,7 +34,6 @@ class L298N(object):
         return self.pwm_a is not None and self.pwm_b is not None
 
     def setup(self):
-        GPIO.setmode(GPIO.BOARD)
         for output_pin in [ENA, IN1, IN2, IN3, IN4, ENB]:
             GPIO.setup(output_pin, GPIO.OUT)
         self.pwm_a = GPIO.PWM(ENA, FREQ)
@@ -36,12 +43,13 @@ class L298N(object):
         self.pwm_b.start(0)
         self.forward_b()
 
-    def cleanup(self):
+    def cleanup(self, all_board=True):
         if DEBUG:
             print "cleanup"
         self.pwm_a.stop()
         self.pwm_b.stop()
-        GPIO.cleanup()
+        if all_board:
+            GPIO.cleanup()
 
     def forward_a(self):
         if DEBUG:
@@ -86,3 +94,48 @@ class L298N(object):
     def stop(self):
         self.set_duty_a(0)
         self.set_duty_b(0)
+
+    def fast_stop(self):
+        GPIO.output((IN1, IN2, IN3, IN4), (GPIO.LOW,)*4)
+        self.stop()
+
+
+class Button(object):
+    def __init__(self, is_connected_to_high):
+        self.is_connected_to_high = is_connected_to_high
+
+    def setup(self):
+        if self.is_connected_to_high:
+            GPIO.setup(TBT, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        else:
+            GPIO.setup(TBT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    def triggered(self):
+        if self.is_connected_to_high:
+            return GPIO.input(TBT)
+        else:
+            return not GPIO.input(TBT)
+
+
+class Switch(object):
+    @staticmethod
+    def setup():
+        GPIO.setup(TSW, GPIO.IN)
+
+    @staticmethod
+    def state():
+        return GPIO.input(TSW)
+
+
+class BoardManager(object):
+    """Triggers on high"""
+    def __init__(self):
+        self.pwm = L298N()
+
+    def __enter__(self):
+        self.pwm.setup()
+        return self, self.pwm
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.pwm.cleanup(all_board=False)
+        GPIO.cleanup()

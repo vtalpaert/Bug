@@ -10,7 +10,7 @@ class WiimoteController(object):
     def is_connected(self):
         return self.wm is not None
 
-    def connect(self, retries=5):
+    def connect(self, retries=5, exit_if_fail=True):
         print 'Press 1+2 on your Wiimote now...'
         i = 1
         while not self.wm:
@@ -19,7 +19,10 @@ class WiimoteController(object):
             except RuntimeError:
                 if i > retries:
                     print('cannot create connection')
-                    quit()
+                    if exit_if_fail:
+                        quit()
+                    else:
+                        return False
                 print 'Error opening wiimote connection'
                 print 'attempt ' + str(i)
                 i += 1
@@ -32,6 +35,7 @@ class WiimoteController(object):
 
         print 'connected',
         print 'battery at %s%%' % self.read_battery()
+        return True
 
     def read_battery(self):
         return self.wm.state['battery']
@@ -44,3 +48,7 @@ class WiimoteController(object):
 
     def read_acc(self):
         return self.wm.state['acc']
+
+    def cleanup(self):
+        if self.wm:
+            self.wm.close()
