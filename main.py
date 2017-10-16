@@ -77,7 +77,7 @@ class Controller(object):
     def cleanup(self):
         if not self.is_setup:
             return
-        self.pwm.cleanup(all_board=True)
+        self.pwm.cleanup(all_board=False)
         self.wiimote.cleanup()
         self.is_setup = False
 
@@ -96,8 +96,8 @@ class Controller(object):
                     self.pwm.set_duty_a(-right)
                     self.pwm.set_duty_b(-left)
                 else:
-                    self.pwm.set_duty_a(right)
-                    self.pwm.set_duty_b(left)
+                    self.pwm.set_duty_a(left)
+                    self.pwm.set_duty_b(right)
                 print self.pwm.state
             elif btn_a_pressed:  # detect a release
                 btn_a_pressed = False
@@ -107,18 +107,21 @@ class Controller(object):
 
     def run(self):
         self.trigger.setup()
-        while True:
-            if self.trigger.triggered():
-                if not self.is_setup:
-                    self.setup()
-                if not self.is_setup:
-                    print "You had an error in controller setup"
+        try:
+            while True:
+                if self.trigger.triggered():
+                    if not self.is_setup:
+                        self.setup()
+                    if not self.is_setup:
+                        print "You had an error in controller setup"
+                    else:
+                        self.control_for(1000)
                 else:
-                    self.control_for(1000)
-            else:
-                if self.is_setup:
-                    self.cleanup()
-            time.sleep(self.refresh_trigger)
+                    if self.is_setup:
+                        self.cleanup()
+                time.sleep(self.refresh_trigger)
+        finally:
+            self.cleanup()
 
 
 if __name__ == "__main__":
