@@ -90,6 +90,7 @@ class Controller(object):
     def control_for(self, nb_iterations):
         for _ in range(nb_iterations):
             left, right = wiimote.get_speed_angle(self.wiimote.read_stick())
+            print left, right
             if self.wiimote.is_btn_z_pressed():
                 self.pwm.set_duty_a(-right)
                 self.pwm.set_duty_b(-left)
