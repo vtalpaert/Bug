@@ -78,6 +78,7 @@ class Controller(object):
                 return
         self.pwm.setup()
         self.is_setup = True
+        print "setup done"
 
     def cleanup(self):
         if not self.is_setup:
