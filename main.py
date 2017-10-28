@@ -108,8 +108,10 @@ class Controller(object):
                     if not self.is_setup:
                         print "You had an error in controller setup"
                     else:
+                        print "control for 1000"
                         self.control_for(1000)
                 else:
+                    print "not triggered"
                     if self.is_setup:
                         self.cleanup()
                 time.sleep(self.refresh_trigger)
