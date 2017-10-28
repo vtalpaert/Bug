@@ -6,6 +6,10 @@ import time
 import board
 import wiimote
 
+max_motor_voltage = 6  # [V]
+max_battery_output = 8.5  # [V]
+max_pwm = int(100 * max_motor_voltage / max_battery_output)
+
 
 def speed_calculator(x0, x1, x2, y0, y1, y2):
     """Function is a ramp between x0 and x1, then continuous plateau between x1 and x2.
@@ -24,10 +28,6 @@ def speed_calculator(x0, x1, x2, y0, y1, y2):
             return y0
     return _angle_to_speed
 
-
-max_motor_voltage = 6  # [V]
-max_battery_output = 8.5  # [V]
-max_pwm = int(100 * max_motor_voltage / max_battery_output)
 
 acc_to_speed = speed_calculator(
     97,
@@ -55,6 +55,9 @@ acc_to_rotation_right = speed_calculator(
 )
 
 
+
+
+
 class Controller(object):
 
     def __init__(self, refresh_pwm=0.05, refresh_trigger=10):
@@ -69,7 +72,9 @@ class Controller(object):
         if self.is_setup:
             return
         if not self.wiimote.is_connected:
-            if not self.wiimote.connect(exit_if_fail=False):
+            if self.wiimote.connect(exit_if_fail=False):
+                self.wiimote.set_mode(True, True, False)
+            else:
                 return
         self.pwm.setup()
         self.is_setup = True
@@ -82,27 +87,15 @@ class Controller(object):
         self.is_setup = False
 
     def control_for(self, nb_iterations):
-        btn_a_pressed = False
         for _ in range(nb_iterations):
-            if self.wiimote.is_btn_a_pressed():
-                btn_a_pressed = True
-                acc_x, acc_y, acc_z = self.wiimote.read_acc()
-                forward = acc_to_speed(acc_y)
-                left_fact = acc_to_rotation_left(acc_x)
-                right_fact = acc_to_rotation_right(-acc_x)
-                left = int(left_fact * forward)
-                right = int(right_fact * forward)
-                if self.wiimote.is_btn_b_pressed():
-                    self.pwm.set_duty_a(-right)
-                    self.pwm.set_duty_b(-left)
-                else:
-                    self.pwm.set_duty_a(left)
-                    self.pwm.set_duty_b(right)
-                print self.pwm.state
-            elif btn_a_pressed:  # detect a release
-                btn_a_pressed = False
-                self.pwm.stop()
-                print "STOP"
+            left, right = wiimote.get_speed_angle(self.wiimote.read_stick())
+            if self.wiimote.is_btn_z_pressed():
+                self.pwm.set_duty_a(-right)
+                self.pwm.set_duty_b(-left)
+            else:
+                self.pwm.set_duty_a(left)
+                self.pwm.set_duty_b(right)
+            print self.pwm.state
             time.sleep(self.refresh_pwm)
 
     def run(self):
@@ -125,5 +118,6 @@ class Controller(object):
 
 
 if __name__ == "__main__":
+    print "Controller start"
     controller = Controller()
     controller.run()
