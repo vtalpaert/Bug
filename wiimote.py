@@ -1,8 +1,8 @@
 import cwiid
+import math
 
 
 class WiimoteController(object):
-
     def __init__(self):
         self.wm = None
 
@@ -88,7 +88,20 @@ def simplify_sitck(values):
     clean2 = 2 * (values[1] - 128.) / (225 - 31)
     return clean1, clean2
 
-import math
+
+def make_pwm(length, angle):
+    length = length * 100 * 6. / 8.5
+    if length == 0:
+        return 0, 0
+    left = length
+    right = length
+    if angle < 0:
+        left = max(0, 1. / 0.7 * angle + 1) * length
+    if angle > 0:
+        right = max(0, -1. / 0.7 * angle + 1) * length
+    print left, right
+    return int(left), int(right)
+
 
 def get_speed_angle(values):
     x, y = simplify_sitck(values)
@@ -99,23 +112,9 @@ def get_speed_angle(values):
     return make_pwm(length, angle)
 
 
-def make_pwm(length, angle):
-    length = length * 100 * 6. / 8.5
-    if length == 0:
-        return 0, 0
-    left = length
-    right = length
-    if angle < 0:
-        left = max(0, 1./0.7 * angle + 1) * length
-    if angle > 0:
-        right = max(0, -1./0.7 * angle +1) * length
-    print left, right
-    return int(left), int(right)
-
-
 if __name__ == '__main__':
     example = {'led': 1, 'rpt_mode': 18, 'ext_type': 1, 'buttons': 0, 'rumble': 0, 'error': 0,
-        'nunchuk': {'acc': (178, 122, 139), 'buttons': 0, 'stick': (135, 131)}, 'battery': 59}
+               'nunchuk': {'acc': (178, 122, 139), 'buttons': 0, 'stick': (135, 131)}, 'battery': 59}
     """
     middle 135 130
     up 133 225
@@ -128,6 +127,7 @@ if __name__ == '__main__':
     right btm 207.5 57
     """
     from time import sleep
+
     wiimote = WiimoteController()
     wiimote.connect()
     wiimote.set_mode(True, False, True)
