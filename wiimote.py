@@ -100,7 +100,7 @@ def make_pwm(length, angle):
     if angle > 0:
         right = max(0, -1. / 0.7 * angle + 1) * length
     print left, right
-    return int(left), int(right)
+    return int(min(left, 100 * 6. / 8.5)), int(min(100 * 6. / 8.5, right))
 
 
 def get_speed_angle(values):
