@@ -55,9 +55,6 @@ acc_to_rotation_right = speed_calculator(
 )
 
 
-
-
-
 class Controller(object):
 
     def __init__(self, refresh_pwm=0.05, refresh_trigger=10):
@@ -89,15 +86,18 @@ class Controller(object):
 
     def control_for(self, nb_iterations):
         for _ in range(nb_iterations):
-            left, right = wiimote.get_speed_angle(self.wiimote.read_stick())
-            print left, right
-            if self.wiimote.is_btn_z_pressed():
-                self.pwm.set_duty_a(-right)
-                self.pwm.set_duty_b(-left)
+            if self.wiimote.is_btn_left_pressed():
+                left, right = -max_pwm, max_pwm
+            elif self.wiimote.is_btn_right_pressed():
+                left, right = max_pwm, -max_pwm
             else:
+                left, right = wiimote.get_speed_angle(self.wiimote.read_stick())
+            if self.wiimote.is_btn_z_pressed():
                 self.pwm.set_duty_a(left)
                 self.pwm.set_duty_b(right)
-            print self.pwm.state
+            else:
+                self.pwm.set_duty_a(-right)
+                self.pwm.set_duty_b(-left)
             time.sleep(self.refresh_pwm)
 
     def run(self):

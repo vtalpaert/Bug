@@ -53,6 +53,12 @@ class WiimoteController(object):
     def is_btn_b_pressed(self):
         return self.wm.state['buttons'] & cwiid.BTN_B
 
+    def is_btn_left_pressed(self):
+        return self.wm.state['buttons'] & cwiid.BTN_LEFT
+
+    def is_btn_right_pressed(self):
+        return self.wm.state['buttons'] & cwiid.BTN_RIGHT
+
     def read_acc(self):
         return self.wm.state['acc']
 
@@ -99,7 +105,6 @@ def make_pwm(length, angle):
         left = max(0, 1. / 0.7 * angle + 1) * length
     if angle > 0:
         right = max(0, -1. / 0.7 * angle + 1) * length
-    print left, right
     return int(min(left, 100 * 6. / 8.5)), int(min(100 * 6. / 8.5, right))
 
 
