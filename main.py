@@ -73,7 +73,7 @@ class Controller(object):
             return
         if not self.wiimote.is_connected:
             if self.wiimote.connect(exit_if_fail=False):
-                self.wiimote.set_mode(True, True, False)
+                self.wiimote.set_mode(True, False, True)
             else:
                 return
         self.pwm.setup()
