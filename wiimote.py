@@ -109,6 +109,7 @@ def make_pwm(length, angle):
         left = max(0, 1./0.7 * angle + 1) * length
     if angle > 0:
         right = max(0, -1./0.7 * angle +1) * length
+    print left, right
     return int(left), int(right)
 
 
