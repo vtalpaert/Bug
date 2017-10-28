@@ -82,6 +82,8 @@ class WiimoteController(object):
 
 
 def simplify_sitck(values):
+    if values is None:
+        return 0, 0
     clean1 = 2 * (values[0] - 131.5) / (232 - 31)
     clean2 = 2 * (values[1] - 128.) / (225 - 31)
     return clean1, clean2
